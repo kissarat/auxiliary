@@ -150,4 +150,9 @@ video/x-msvideo                       avi;
   .map(s => s.trim().split(/\s+/))
   .forEach(([type, ...exts]) => exts.forEach(ext => extensions['.' + ext] = type));
 
-server.listen(port);
+if (module.parent) {
+  module.exports = server;
+}
+else {
+  server.listen(port);
+}
