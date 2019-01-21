@@ -168,22 +168,22 @@ function substitute(object, resolve) {
 }
 
 function visitor(fun, check = o => _.isObject(o)) {
-  return function visit(object, stack = [], root) {
+  return function visit(parent, stack = [], root) {
     if (!root) {
-      root = object;
+      root = parent;
     }
     const results = [];
-    for (const key in object) {
-      let v = object[key];
-      const sub = [...stack, key];
-      if (check(v, sub, object, root)) {
-        const result = fun(v, sub, object, root);
+    for (const key in parent) {
+      let object = parent[key];
+      const keys = [...stack, key];
+      if (check(object, keys, parent, root)) {
+        const result = fun(object, keys, parent, root);
         if (undefined !== result) {
           results.push(result);
         }
       }
-      if (_.isObject(v)) {
-        results.push(...visit(v, sub, root));
+      if (_.isObject(object)) {
+        results.push(...visit(object, keys, root));
       }
     }
     return results;
@@ -252,7 +252,8 @@ function resolveFilename(...paths) {
 
 function load(url) {
   const parts = url.split('#');
-  let content = require(resolveFilename(parts[0]));
+  const filename = parts[0];
+  let content = require(/^\.?\.?\//.test(filename) ? filename : resolveFilename(filename));
   if (parts.length > 1) {
     const names = parts[1].split('/').slice(1);
     for(const name of names) {
@@ -260,6 +261,10 @@ function load(url) {
     }
   }
   return content;
+}
+
+function last(array) {
+  return array[array.length - 1];
 }
 
 module.exports = {
@@ -279,5 +284,6 @@ module.exports = {
   resolveFilename,
   arrayMerge,
   load,
+  last,
   projectRoot
 };
