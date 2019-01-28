@@ -6,6 +6,6 @@ describe("builder", function () {
   it("load", function () {
     const a = require(__dirname + "/../data/load/a.json");
     builder.build(a);
-    assert("auxiliary" === a.sub.name);
+    assert.strictEqual("Hello", a.sub.name);
   })
 });

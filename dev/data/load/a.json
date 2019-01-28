@@ -1,5 +1,5 @@
 {
   "sub": {
-    "$load": "./b.json#/sub"
+    "$load": "dev/data/load/b.json#/sub"
   }
 }
