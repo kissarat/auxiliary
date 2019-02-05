@@ -131,6 +131,9 @@ function variables(vars) {
   };
 }
 
+const VARIABLE_ONLY_REGEX = /^\$?{([^}]+)}$/;
+const VARIABLE_REGEX = /\$?{([^}]+)}/g;
+
 function substitute(object, resolve) {
   if (null !== resolve && "object" === typeof resolve) {
     resolve = variables(resolve);
@@ -149,11 +152,11 @@ function substitute(object, resolve) {
         result[key] = null === v ? null : substitute(object[key], resolve);
         break;
       case "string":
-        const m = /^\$?{([^}]+)}$/.exec(v);
+        const m = VARIABLE_ONLY_REGEX.exec(v);
         if (m) {
           result[key] = resolve(m[1], "$" === m[0][0]);
         } else {
-          result[key] = v.replace(/\${([^}]+)}/, function(s, name) {
+          result[key] = v.replace(VARIABLE_REGEX, function(s, name) {
             return resolve(name, "$" === s[0]);
           });
         }
