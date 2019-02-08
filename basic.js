@@ -39,6 +39,10 @@ const basic = {
     return true;
   },
 
+  isNothing(v) {
+    return undefined === v || null === v;
+  },
+
   isPureObject(o) {
     return module.exports.isObject(o) && (Object === o.constructor || 'function' !== typeof o.constructor);
   },
@@ -97,6 +101,17 @@ const basic = {
 
   aspect(kind, cases, resolve = module.exports.resolver(kind), ...args) {
     return resolve(kind, this, cases, ...args);
+  },
+
+  get(object, path) {
+    const keys = path.split(".");
+    for(const key of keys) {
+      object = object[key];
+      if (basic.isNothing(object)) {
+        break;
+      }
+    }
+    return object;
   }
 };
 
