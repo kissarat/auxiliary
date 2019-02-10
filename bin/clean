@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+
+# @author Taras Labiak <taras.labiak@indeema.com>
+
+rm -r node_modules/*
+rm -r dev/node_modules/*
