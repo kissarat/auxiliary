@@ -34,15 +34,15 @@ function read(reader = process.stdin, ...args) {
  * @returns {Promise<Buffer>}
  */
 read.buffer = function buffer(reader = process.stdin) {
-  return new Promise(function (resolve, reject) {
+  return new Promise(function(resolve, reject) {
     const chunks = [];
-    reader.on("data", function (chunk) {
+    reader.on("data", function(chunk) {
       chunks.push(chunk);
     });
-    reader.on("error", function (error) {
+    reader.on("error", function(error) {
       reject(error);
     });
-    reader.on("end", function () {
+    reader.on("end", function() {
       const buffer =
         chunks.length > 1
           ? "string" === typeof chunks[0]
@@ -117,7 +117,7 @@ function die(message) {
 }
 
 function variables(vars) {
-  return function (name, evaluate) {
+  return function(name, evaluate) {
     if (evaluate) {
       return eval(name);
     }
@@ -156,7 +156,7 @@ function substitute(object, resolve) {
         if (m) {
           result[key] = resolve(m[1], "$" === m[0][0]);
         } else {
-          result[key] = v.replace(VARIABLE_REGEX, function (s, name) {
+          result[key] = v.replace(VARIABLE_REGEX, function(s, name) {
             return resolve(name, "$" === s[0]);
           });
         }
@@ -226,7 +226,7 @@ function merge(target, source, options = {}) {
   return target;
 }
 
-merge.all = function ([target, ...sources], options) {
+merge.all = function([target, ...sources], options) {
   for (const source of sources) {
     target = merge(target, source, options);
   }
@@ -236,13 +236,13 @@ merge.all = function ([target, ...sources], options) {
 let projectRoot = __dirname;
 function lookupRootDirectory(dirname) {
   for (const filename of fs.readdirSync(dirname)) {
-    if ('package.json' === filename) {
+    if ("package.json" === filename) {
       projectRoot = dirname;
       break;
     }
   }
-  const newDirname = path.resolve(dirname + '/..');
-  if ('/' !== newDirname) {
+  const newDirname = path.resolve(dirname + "/..");
+  if ("/" !== newDirname) {
     lookupRootDirectory(newDirname);
   }
 }
@@ -254,11 +254,13 @@ function resolveFilename(...paths) {
 }
 
 function load(url) {
-  const parts = url.split('#');
+  const parts = url.split("#");
   const filename = parts[0];
-  let content = require(/^\.?\.?\//.test(filename) ? filename : resolveFilename(filename));
+  let content = require(/^\.?\.?\//.test(filename)
+    ? filename
+    : resolveFilename(filename));
   if (parts.length > 1) {
-    const names = parts[1].split('/').slice(1);
+    const names = parts[1].split("/").slice(1);
     for (const name of names) {
       content = content[name];
     }
@@ -291,7 +293,7 @@ function transformation(mapping) {
       }
     }
     return result;
-  }
+  };
 }
 
 module.exports = {

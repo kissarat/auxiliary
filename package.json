@@ -1,6 +1,6 @@
 {
   "name": "auxiliary",
-  "version": "0.0.16",
+  "version": "0.0.17",
   "description": "Toolbox for everyone",
   "main": "index.js",
   "scripts": {

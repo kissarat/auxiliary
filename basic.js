@@ -1,9 +1,8 @@
-const constants = require('./constants');
-const messages = require('./messages');
+const constants = require("./constants");
+const messages = require("./messages");
 
 const basic = {
   original: {},
-
   constants,
   messages,
 
@@ -12,25 +11,25 @@ const basic = {
   },
 
   isObject(obj) {
-    return 'object' === typeof obj && null !== obj;
+    return "object" === typeof obj && null !== obj;
   },
 
   strip(s) {
     return s
-        .trim()
-        .split(/\s*\n+\s*/)
-        .join("\n");
+      .trim()
+      .split(/\s*\n+\s*/)
+      .join("\n");
   },
 
   isFunction(fun) {
-    return 'function' === typeof fun;
+    return "function" === typeof fun;
   },
 
   isEmpty(obj) {
     if (!obj) {
       return true;
     }
-    if ('string' === typeof obj) {
+    if ("string" === typeof obj) {
       return !obj.trim();
     }
     for (const key in obj) {
@@ -44,11 +43,18 @@ const basic = {
   },
 
   isPureObject(o) {
-    return module.exports.isObject(o) && (Object === o.constructor || 'function' !== typeof o.constructor);
+    return (
+      module.exports.isObject(o) &&
+      (Object === o.constructor || "function" !== typeof o.constructor)
+    );
   },
 
   isRichObject(o) {
-    return module.exports.isObject(o) && 'function' === typeof o.constructor && Object !== o.constructor;
+    return (
+      module.exports.isObject(o) &&
+      "function" === typeof o.constructor &&
+      Object !== o.constructor
+    );
   },
 
   typeOf(o) {
@@ -56,9 +62,13 @@ const basic = {
   },
 
   choice(name, cases) {
-    return cases[name] || cases.default || function () {
-      throw new Error(messages.InvalidOption(name));
-    };
+    return (
+      cases[name] ||
+      cases.default ||
+      function() {
+        throw new Error(messages.InvalidOption(name));
+      }
+    );
   },
 
   fork(object, resolvers, ...args) {
@@ -67,7 +77,7 @@ const basic = {
   },
 
   mixin(extension) {
-    for(const key in extension) {
+    for (const key in extension) {
       const original = basic[key];
       if (original) {
         basic.original[key] = original;
@@ -81,7 +91,9 @@ const basic = {
   },
 
   resolver(name) {
-    return 'function' === typeof this[name] ? (name, ...args) => this[name](...args) : (...args) => this[module.exports.constants.DefaultChoiceName](name, ...args)
+    return "function" === typeof this[name]
+      ? (name, ...args) => this[name](...args)
+      : (...args) => this[constants.DefaultChoiceName](name, ...args);
   },
 
   identity(o) {
@@ -89,14 +101,19 @@ const basic = {
   },
 
   callable(fun, ...args) {
-    return 'function' === typeof fun ? fun(...args) : args;
+    return "function" === typeof fun ? fun(...args) : args;
   },
 
   decorate(fun, before, after) {
     return function(...args) {
-      const r = 'function' === typeof before ? before.call(this, fun, ...args) : fun.call(this, ...args);
-      return 'function' === typeof after ? after.call(this, fun, r, ...args) : r;
-    }
+      const r =
+        "function" === typeof before
+          ? before.call(this, fun, ...args)
+          : fun.call(this, ...args);
+      return "function" === typeof after
+        ? after.call(this, fun, r, ...args)
+        : r;
+    };
   },
 
   aspect(kind, cases, resolve = module.exports.resolver(kind), ...args) {
@@ -105,7 +122,7 @@ const basic = {
 
   get(object, path) {
     const keys = path.split(".");
-    for(const key of keys) {
+    for (const key of keys) {
       object = object[key];
       if (basic.isNothing(object)) {
         break;
