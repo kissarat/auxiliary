@@ -9,4 +9,13 @@ function stringify(obj, sep = "&", eq = "=") {
   return array.join(sep);
 }
 
-module.exports = { escape, stringify };
+function parse(str, sep = '&', eq = '=') {
+  const obj = {};
+  for(const param of str.split(sep)) {
+    const [key, value] = param.split(eq);
+    obj[key] = value;
+  }
+  return obj;
+}
+
+module.exports = { escape, stringify, parse };
