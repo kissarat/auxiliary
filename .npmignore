@@ -10,7 +10,6 @@
 .tmp
 .Trashes
 .vscode
-.vscode
 *.7z
 *.cab
 *.class
@@ -53,7 +52,6 @@ ehthumbs.db
 Icon
 lcov.info
 lib-cov
-LICENSE
 LICENSE
 logs
 nbproject

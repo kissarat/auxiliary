@@ -296,6 +296,32 @@ function transformation(mapping) {
   };
 }
 
+function equals(a, b) {
+  const type = typeof a;
+  if (type === typeof b) {
+    if ("object" === type) {
+      if (null === a && null === b) {
+        return true;
+      }
+      for (const key in a) {
+        const v = a[key];
+        switch (typeof v) {
+          case "function":
+            continue;
+            case "object":
+            // if (null === v && )
+          default:
+            if (v !== b[key]) {
+              return false;
+            }
+        }
+      }
+    }
+    return a === b;
+  }
+  return false;
+}
+
 module.exports = {
   breakpoint,
   cry,
