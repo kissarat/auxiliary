@@ -280,9 +280,9 @@ function transformation(mapping) {
       const m = mapping[key];
       switch (typeof m) {
         case "function": {
-          const key = m(v, object, key);
-          if (key) {
-            result[key] = v;
+          const name = m(v, object, key);
+          if (name) {
+            result[name] = v;
           }
           break;
           
