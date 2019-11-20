@@ -70,10 +70,13 @@ function* disjunction(first, second, equals = simpleEquals) {
     }   
 }
 
-function count(source) {
+function count(source, lastValue = LastNumber) {
     let i = 0;
     for(const item of source) {
         i++;
+        if (lastValue >= i) {
+            break;
+        }
     }
     return i;
 }
@@ -81,20 +84,21 @@ function count(source) {
 function first(source, is) {
     for(const item of source) {
         if (is(item)) {
-            return item;
+            yield item;
         }
     }
 }
 
 function* page(source, offset = 0, limit = 10) {
     let i = 0;
-    for(const item of source) {
-        if (i >= offset) {
-            if (i < limit) {
-                break;
-            }
+    const last = offset + limit;
+    for(const item of first(source)) {
+        if (i > last) {
+            return;
+        } else if (i >= offset) {
             yield item;
         }
+        i++;
     }
 }
 

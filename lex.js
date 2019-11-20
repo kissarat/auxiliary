@@ -1,6 +1,6 @@
 const lexems = {
   // keyword: /^(break|case|catch|continue|debugger|default|delete|do|else|finally|for|function|if|in|instanceof|new|return|switch|this|throw|try|typeof|var|void|while|with)/,
-  literal: /^[a-z]\w*/,
+  literal: /^[a-z]\w*/i,
   number: /^\d+(\.\d+)?/,
   space: /^\s+/,
   line: ';',
@@ -58,4 +58,4 @@ function ignore(tokens, list = ['unknown', 'space']) {
   return tokens.filter(t => list.indexOf(t[0]) < 0)
 }
 
-module.exports = {scan, ignore};
+module.exports = {scan, ignore, Lexems: lexems};
