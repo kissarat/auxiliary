@@ -279,9 +279,14 @@ function transformation(mapping) {
       const v = object[key];
       const m = mapping[key];
       switch (typeof m) {
-        case "function":
-          result[m(v, object, key)] = v;
+        case "function": {
+          const key = m(v, object, key);
+          if (key) {
+            result[key] = v;
+          }
           break;
+          
+        }
         case "string":
           result[m] = v;
           break;
