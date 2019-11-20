@@ -1,6 +1,12 @@
 /**
  * @author Taras Labiak <kissarat@gmail.com>
  */
-// const utilities = require('./utilities');
 
-module.exports = require('./basic');
+module.exports = {
+    ...require('./basic'),
+    ...require('./utilities'),
+    ...require('./context'),
+    ...require('./describe'),
+    ...require('./lex'),
+    ...require('./querystring')
+};
