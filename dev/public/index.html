@@ -112,17 +112,21 @@
                 return prefix + objectId++;
             }
 
-            const active = node => node && node.active;
+            // const enabled = node => node && node.enabled;
 
             class Node {
                 constructor(id = createId()) {
                     this.id = id;
-                    this.active = true;
+                    // this.enabled = true;
                 }
 
                 describe() {
                     return `${this.constructor}(${this.id})`;
                 }
+            }
+
+            function stringify(object) {
+                return object.toString();
             }
 
             class Place extends Node {
@@ -136,12 +140,32 @@
                 }
 
                 decrement() {
-                    if (this.tokenCount > 0) {
+                    if (this.active) {
                         this.tokenCount--;
                     } else {
-                        throw new Error(`Negative marker count at ${this.describe()}`)
+                        throw new Error(`${this.describe()}: negative token count`)
                     }
                 }
+
+                toString() {
+                    return `${this.id}=${this.tokenCount}`;
+                }
+
+                describe() {
+                    return `place(${this.toString()})`;
+                }
+
+                get active() {
+                    return this.tokenCount > 0;
+                }
+            }
+
+            Place.create = function(string) {
+                const [id, count] = string.split('=');
+                return new Place(
+                    +count || 0,
+                    id
+                )
             }
 
             class Transition extends Node {
@@ -150,14 +174,94 @@
                     this.input = input;
                     this.output = output;
                 }
+
+                fire() {
+                    if (this.input.every(p => p.active)) {
+                        for(const place of this.input) {
+                            place.decrement();
+                        }
+                        for(const place of this.output) {
+                            place.increment();
+                        }
+                        return true;
+                    }
+                    return false;
+                }
+
+                toString() {
+                    return `${this.id}: ${this.input.join(',')} -> ${this.output.join(',')}`;
+                }
+
+                describe() {
+                    return `transition(${this.toString()})`;
+                }
+            }
+
+            Transition.create = function(string) {
+                const [id, io] = string.split(':');
+                const [input, output] = io.split('->');
+                return new Transition(
+                    input.split(','),
+                    output.split(','),
+                    id
+                )
             }
 
             class Network {
-                constructor(transitions = [], places = []) {
-                    this.transitions = transitions;
+                constructor(places = [], transitions = []) {
                     this.places = places;
+                    this.transitions = transitions;
+                }
+
+                fire() {
+                    return this.transitions.some(t => t.fire());
+                }
+
+                run(n = LastNumber) {
+                    for(let i = 0; i < n && this.fire(); i++) {}
+                }
+
+                toString() {
+                    return [
+                        ...this.places.map(stringify),
+                        ...this.transitions.map(stringify)
+                    ].join(';\n');
+                }
+
+                toJSONString() {
+                    return JSON.stringify(this, null, '  ');
                 }
             }
+
+            Network.create = function(string) {
+                const statements = string
+                    .replace(/[ \t]+/g, '')
+                    .split(/\s*;+\s*/)
+                const transitions = [];
+                const places = [];
+                let i = 0;
+                for(const s of statements) {
+                    if ('#' === s[0] || s.length === 0) {
+                        continue;
+                    }
+                    if (s.includes('->')) {
+                        transitions.push(Transition.create(s));
+                    } else if (s.includes('=') || /^\w+$/.test(s)) {
+                        places.push(Place.create(s));
+                    } else {
+                        console.error(`Unknown syntax at ${i}: ${s}`)
+                    }
+                    i++;
+                }
+                return new Network(
+                    places,
+                    transitions
+                );
+            }
+
+            const network = Network.create(`p1=1; p2=1; p3;
+                t1: p1,p2 -> p3;
+                t2: p3 -> p2`);
 
             const node = (x = 0, y = x) => ({
                 to: [],
