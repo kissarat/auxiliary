@@ -90,6 +90,45 @@
             const cof = i => i * cellSize + cellSize / 2;
             let objectId = 0;
 
+            class Point {
+                constructor(x = 0, y = 0) {
+                    this.x = x;
+                    this.y = y;
+                }
+
+                scale(s) {
+                    return new Point(this.x * s, this.y * s);
+                }
+            }
+
+            class Vector extends Point {
+                constructor(x = 0, y = 0, offset = new Point()) {
+                    super(x, y);
+                    this.offset = offset;
+                }
+            }
+
+            function createId(prefix = 'n') {
+                return prefix + objectId++;
+            }
+
+            class Node {
+                constructor(to = [], id = createId()) {
+                    this.id = id;
+                    this.to = to;
+                }
+            }
+
+            class Network {
+                constructor(nodes = []) {
+                    this.nodes = nodes;
+                }
+
+                getNodeById(id) {
+                    return this.nodes.find(n => n.id === id);
+                }
+            }
+
             const node = (x = 0, y = x) => ({
                 to: [],
                 x,
