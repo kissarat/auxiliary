@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Petri Network</title>
+        <title>Petri PetriNetwork</title>
         <script src="../../basic.js"></script>
         <script src="../../generate.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -23,7 +23,7 @@
         </style>
     </head>
     <body>
-        <h1>Petri Network</h1>
+        <h1>Petri PetriNetwork</h1>
         <template>
 
         </template>
@@ -99,6 +99,10 @@
                 scale(s) {
                     return new Point(this.x * s, this.y * s);
                 }
+
+                toString() {
+                    return `@${this.x},${this.y}`;
+                }
             }
 
             class Vector extends Point {
@@ -126,7 +130,8 @@
             }
 
             function stringify(object) {
-                return object.toString();
+                const string = object.toString();
+                return object.point ? `${string} ${object.point}` : string;
             }
 
             class Place extends Node {
@@ -208,14 +213,14 @@
                 )
             }
 
-            class Network {
+            class PetriNetwork {
                 constructor(places = [], transitions = []) {
                     this.transitions = transitions;
                     this.places = {};
                     for(const p of places) {
                         this.places[p.id] = p;
                     }
-                    // this.lookup = id => Network.prototype.lookup.call(this, id);
+                    // this.lookup = id => PetriNetwork.prototype.lookup.call(this, id);
                 }
 
                 lookup(id) {
@@ -251,10 +256,18 @@
                 }
             }
 
-            Network.create = function(string) {
-                const statements = string
+            PetriNetwork.Place = Place;
+            PetriNetwork.Transition = Transition;
+
+            function statementsOf(string) {
+                return string
+                    .trim()
                     .replace(/[ \t]+/g, '')
-                    .split(/\s*;+\s*/)
+                    .split(/\s*;+\s*/);
+            }
+
+            PetriNetwork.create = function(string) {
+                const statements = typeof string === 'string' ? statementsOf(string) : string;
                 const transitions = [];
                 const places = [];
                 let i = 0;
@@ -263,24 +276,50 @@
                         continue;
                     }
                     if (s.includes('->')) {
-                        transitions.push(Transition.create(s));
+                        transitions.push(this.Transition.create(s));
                     } else if (s.includes('=') || /^\w+$/.test(s)) {
-                        places.push(Place.create(s));
+                        places.push(this.Place.create(s));
                     } else {
                         console.error(`Unknown syntax at ${i}: ${s}`)
                     }
                     i++;
                 }
-                return new Network(
+                return new PetriNetwork(
                     places,
                     transitions
                 );
             }
 
-            const network = Network.create(`p1=1; p2=1; p3;
+            const setupPoint = parse => string => {
+                let x, y;
+                const node = parse(string.replace(/@(\d+),(\d+)/g, (s, sx, sy) => {
+                    x = +sx;
+                    y = +sy;
+                    return '';
+                }));
+                if (isFinite(x) && isFinite(y)) {
+                    node.point = new Point(x, y);
+                }
+                return node;
+            }
+
+            class PetriNetworkView extends PetriNetwork {};
+            class PlaceView extends Place {};
+            class TransitionView extends Transition {};
+            PlaceView.create = setupPoint(Place.create);
+            TransitionView.create = setupPoint(Transition.create);
+            PetriNetworkView.Place = PlaceView;
+            PetriNetworkView.Transition = TransitionView;
+            PetriNetworkView.create = PetriNetwork.create;
+
+            const network = PetriNetworkView.create(`
+                p1=1 @1,1;
+                p2;
+                p3=1;
                 t1: p1,p2 -> p3;
                 t2: p3 -> p2;
-                t3: p2 -> p1`);
+                t3: p2 -> p1`
+            );
 
             const node = (x = 0, y = x) => ({
                 to: [],
