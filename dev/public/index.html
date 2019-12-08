@@ -34,7 +34,7 @@
             v-on:mouseup="up(...coordinatesOf($event))"
             >
                 <path v-bind:d="grid" stroke="rgba(0, 0, 0, 0.2)" />
-                <path v-bind:d="arrow" stroke="black" />
+                <path v-bind:d="activeArrow" stroke="black" />
                 <g>
                     <rect v-if="selection"
                         v-bind:x="offset(selection.x)"
@@ -53,7 +53,7 @@
                         />
                         <path v-for="toNode of getNodesById(...to)"
                             stroke="black"
-                            v-bind:d="line(x, y, toNode.x, toNode.y)"
+                            v-bind:d="arrow(x, y, toNode.x, toNode.y)"
                         />
                     </g>
                 </g>
@@ -71,6 +71,7 @@
         </div>
         <script>
             const cellSize = 24;
+            const arrowOffset = cellSize * 3/4 - 2;
             function* grid(size, scale = cellSize) {
                 const end = size * scale;
                 for(const i of range(size)) {
@@ -127,7 +128,26 @@
                 return [numberOf(e.offsetX), numberOf(e.offsetY)];
             }
 
-            const line = (x1, y1, x2, y2) => `M ${cof(x1)} ${cof(y1)} L ${cof(x2)} ${cof(y2)}`
+            function pointAt(x1, y1, x2, y2, offset) {
+                const x = x2 - x1;
+                const y = y2 - y1;
+                const length = Math.sqrt(x**2 + y**2);
+                const d = (offset > 0 ? offset : (length + offset)) / length;
+                const ax = x1 + x * d;
+                const ay = y1 + y * d;
+                return [ax, ay];
+            }
+            
+            const segment = fn => (x1, y1, x2, y2) => fn(cof(x1), cof(y1), cof(x2), cof(y2));
+            const rawLine = (x1, y1, x2, y2) => `M ${x1} ${y1} L ${x2} ${y2}`;
+            const line = segment(rawLine);
+            function rawArrow(x1, y1, x2, y2) {
+                return rawLine(
+                    ...pointAt(x1, y1, x2, y2, arrowOffset),
+                    ...pointAt(x1, y1, x2, y2, -arrowOffset)
+                );
+            }
+            const arrow = segment(rawArrow);
 
             const app = new Vue({
                 el: '#app',
@@ -137,7 +157,7 @@
                     radius: cellSize / 2,
                     nodes,
                     mode: Modes.Nothing,
-                    arrow: '',
+                    activeArrow: '',
                     target: null
                 },
                 computed: {
@@ -153,6 +173,7 @@
                     reset,
                     coordinatesOf,
                     line,
+                    arrow,
                     getById(id) {
                         return this.nodes.find(n => n.id === id);
                     },
@@ -195,7 +216,7 @@
                     up(x, y) {
                         switch(this.mode) {
                             case Modes.Graph:
-                                this.arrow = '';
+                                this.activeArrow = '';
                                 const node = this.detect(x, y);
                                 if (node) {
                                     this.addTo(node.id);
@@ -212,7 +233,7 @@
                                     this.target.y = y;
                                     break;
                                 case Modes.Graph:
-                                    this.arrow = line(
+                                    this.activeArrow = arrow(
                                         this.target.x, this.target.y,
                                         x, y
                                     );
