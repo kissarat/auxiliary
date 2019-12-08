@@ -112,20 +112,50 @@
                 return prefix + objectId++;
             }
 
+            const active = node => node && node.active;
+
             class Node {
-                constructor(to = [], id = createId()) {
+                constructor(id = createId()) {
                     this.id = id;
-                    this.to = to;
+                    this.active = true;
+                }
+
+                describe() {
+                    return `${this.constructor}(${this.id})`;
+                }
+            }
+
+            class Place extends Node {
+                constructor(tokenCount = 0, id = createId('s')) {
+                    super(id);
+                    this.tokenCount = tokenCount;
+                }
+
+                increment() {
+                    this.tokenCount++;
+                }
+
+                decrement() {
+                    if (this.tokenCount > 0) {
+                        this.tokenCount--;
+                    } else {
+                        throw new Error(`Negative marker count at ${this.describe()}`)
+                    }
+                }
+            }
+
+            class Transition extends Node {
+                constructor(input = [], output = [], id = createId('t')) {
+                    super(id);
+                    this.input = input;
+                    this.output = output;
                 }
             }
 
             class Network {
-                constructor(nodes = []) {
-                    this.nodes = nodes;
-                }
-
-                getNodeById(id) {
-                    return this.nodes.find(n => n.id === id);
+                constructor(transitions = [], places = []) {
+                    this.transitions = transitions;
+                    this.places = places;
                 }
             }
 
