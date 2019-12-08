@@ -1,9 +1,0 @@
-#!/usr/bin/env bash
-# @author Taras Labiak <kissarat@gmail.com>
-
-# Allocates more memory swap
-FILENAME=/tmp/swap-$(date +%s)
-dd if=/dev/zero of=${FILENAME} bs=1M count=$1
-mkswap ${FILENAME}
-chmod 600 ${FILENAME}
-swapon ${FILENAME}
