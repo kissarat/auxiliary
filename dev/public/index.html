@@ -175,13 +175,14 @@
                     this.output = output;
                 }
 
-                fire() {
-                    if (this.input.every(p => p.active)) {
-                        for(const place of this.input) {
+                fire(lookup) {
+                    const input = this.input.map(lookup);
+                    if (input.every(p => p.active)) {
+                        for(const place of input) {
                             place.decrement();
                         }
                         for(const place of this.output) {
-                            place.increment();
+                            lookup(place).increment();
                         }
                         return true;
                     }
@@ -209,27 +210,44 @@
 
             class Network {
                 constructor(places = [], transitions = []) {
-                    this.places = places;
                     this.transitions = transitions;
+                    this.places = {};
+                    for(const p of places) {
+                        this.places[p.id] = p;
+                    }
+                    // this.lookup = id => Network.prototype.lookup.call(this, id);
+                }
+
+                lookup(id) {
+                    return this.places[id];
                 }
 
                 fire() {
-                    return this.transitions.some(t => t.fire());
+                    return this.transitions.some(t => t.fire(id => this.lookup(id)));
                 }
 
-                run(n = LastNumber) {
-                    for(let i = 0; i < n && this.fire(); i++) {}
+                run(n = 100) {
+                    let i = 0;
+                    for(; i < n && this.fire(); i++) {}
+                    return i;
                 }
 
                 toString() {
                     return [
-                        ...this.places.map(stringify),
+                        ...Object.values(this.places).map(stringify),
                         ...this.transitions.map(stringify)
                     ].join(';\n');
                 }
 
+                toJSON() {
+                    return {
+                        places: Object.values(this.places),
+                        transitions: this.transitions
+                    };
+                }
+
                 toJSONString() {
-                    return JSON.stringify(this, null, '  ');
+                    return JSON.stringify(this.toJSON(), null, '  ');
                 }
             }
 
@@ -261,7 +279,8 @@
 
             const network = Network.create(`p1=1; p2=1; p3;
                 t1: p1,p2 -> p3;
-                t2: p3 -> p2`);
+                t2: p3 -> p2;
+                t3: p2 -> p1`);
 
             const node = (x = 0, y = x) => ({
                 to: [],
