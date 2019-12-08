@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>Auxiliary</title>
+        <title>Petri Network</title>
         <script src="../../basic.js"></script>
         <script src="../../generate.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
@@ -23,7 +23,7 @@
         </style>
     </head>
     <body>
-        <h1>Auxiliary</h1>
+        <h1>Petri Network</h1>
         <template>
 
         </template>
@@ -44,11 +44,18 @@
                         fill="transparent"
                         stroke="rgba(0, 0, 0, 0.6)"
                     />
-                    <circle v-for="{x, y, id} of nodes"
-                    id="circle"
-                    v-bind:r="radius"
-                    v-bind:fill="isSelected(id) ? 'black' : 'rgba(0, 0, 0, 0.7)'"
-                    v-bind:cx="cof(x)" v-bind:cy="cof(y)" />
+                    <g v-bind:id="id" v-for="{x, y, id, to} of nodes">
+                        <circle
+                            v-bind:r="radius"
+                            v-bind:fill="isSelected(id) ? 'black' : 'rgba(0, 0, 0, 0.7)'"
+                            v-bind:cx="cof(x)"
+                            v-bind:cy="cof(y)"
+                        />
+                        <path v-for="toNode of getNodesById(...to)"
+                            stroke="black"
+                            v-bind:d="line(x, y, toNode.x, toNode.y)"
+                        />
+                    </g>
                 </g>
             </svg>
             <div id="toolbox">
@@ -63,7 +70,7 @@
             </div>
         </div>
         <script>
-            const cellSize = 20;
+            const cellSize = 24;
             function* grid(size, scale = cellSize) {
                 const end = size * scale;
                 for(const i of range(size)) {
@@ -145,11 +152,28 @@
                     cof,
                     reset,
                     coordinatesOf,
+                    line,
+                    getById(id) {
+                        return this.nodes.find(n => n.id === id);
+                    },
+                    addTo(id) {
+                        if (!this.isSelected(id) && !this.target.to.find(n => n.id === id)) {
+                            this.target.to.push(id);
+                        }
+                    },
                     offset(x) {
                         return x * cellSize;
                     },
                     isSelected(id) {
                         return this.target && this.target.id === id;
+                    },
+                    *getNodesById(...ids) {
+                        for(const id of ids) {
+                            const node = this.getById(id);
+                            if (node) {
+                                yield node;
+                            }
+                        }
                     },
                     detect(x, y) {
                         return this.nodes.find(n => n.x === x && n.y === y);
@@ -168,9 +192,15 @@
                             this.mode = e.ctrlKey ? Modes.Graph : Modes.Move;
                         }
                     },
-                    up() {
-                        if (Modes.Graph === this.mode) {
-                            this.arrow = '';
+                    up(x, y) {
+                        switch(this.mode) {
+                            case Modes.Graph:
+                                this.arrow = '';
+                                const node = this.detect(x, y);
+                                if (node) {
+                                    this.addTo(node.id);
+                                }
+                                break;
                         }
                         this.mode = Modes.Nothing;
                     },
@@ -193,7 +223,7 @@
                 }
             })
             onunload = () => localStorage.setItem('nodes',
-                JSON.stringify(app.nodes.map(chain(pick, ...Object.keys(defaultNode)))));
+                JSON.stringify(app.nodes.map(chain(pick, 'id', 'to', 'x', 'y'))));
         </script>
     </body>
 </html>
