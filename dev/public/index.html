@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Auxiliary</title>
+        <script src="../../basic.js"></script>
+        <script src="../../generate.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <style>
+            #toolbox {
+                position: fixed;
+                top: 0;
+                right: 0;
+                width: 200px;
+            }
+
+            .target-name {
+                height: 22px;
+            }
+
+            .target-name input {
+                width: 80px;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Auxiliary</h1>
+        <template>
+
+        </template>
+        <div id="app">
+            <svg width="600" height="600" xmlns="http://www.w3.org/2000/svg"
+            v-on:mousemove="move(...coordinatesOf($event))"
+            v-on:mousedown="down(...coordinatesOf($event))"
+            v-on:mouseup="up(...coordinatesOf($event))"
+            >
+                <path v-bind:d="grid" stroke="rgba(0, 0, 0, 0.2)" />
+                <g>
+                    <rect v-if="selection"
+                        v-bind:x="offset(selection.x)"
+                        v-bind:y="offset(selection.y)"
+                        v-bind:width="scale"
+                        v-bind:height="scale"
+                        fill="transparent"
+                        stroke="rgba(0, 0, 0, 0.6)"
+                    />
+                    <circle v-for="{x, y, id} of nodes"
+                    id="circle"
+                    v-bind:r="radius"
+                    v-bind:fill="isSelected(id) ? 'black' : 'rgba(0, 0, 0, 0.7)'"
+                    v-bind:cx="centerOf(x)" v-bind:cy="centerOf(y)" />
+                </g>
+            </svg>
+            <div id="toolbox">
+                <div class="target-name">
+                    Selected:
+                    <input v-if="target" v-model="target.id" />
+                </div>
+                <button v-on:click="add()">Add</button>
+                <button v-on:click="remove()"
+                    v-bind:disabled="!this.selection">Remove</button>
+                <button v-on:click="reset()">Clear</button>
+            </div>
+        </div>
+        <script>
+            const cellSize = 20;
+            function* grid(size, scale = cellSize) {
+                const end = size * scale;
+                for(const i of range(size)) {
+                    const j = i * scale;
+                    yield `M 0 ${j} H ${end}`;
+                }
+                for(const i of range(size)) {
+                    const j = i * scale;
+                    yield `M ${j} 0 V ${end}`;
+                }
+            }
+            const svg = document.querySelector('svg');
+            const box = svg.getBoundingClientRect();
+            const numberOf = x => Math.floor(x / cellSize);
+            const centerOf = i => i * cellSize + cellSize / 2;
+            let objectId = 0;
+            const node = (x = 0, y = x) => ({ x, y, id: `n${objectId++}` });
+            const defaultNode = node();
+            let nodes;
+            function reset() {
+                app.nodes.splice(0);
+                objectId = 1;
+                localStorage.clear();
+            }
+            try {
+                nodes = JSON.parse(localStorage.getItem('nodes'));
+                if (!Array.isArray(nodes)) {
+                    throw Error();
+                }
+            } catch(ex) {
+                reset();
+            }
+            const lastObjectId = nodes
+                .map(n => (n.id && 'n' === n.id[0] && +n.id.slice(1)) || 0)
+                .reduce((a, b) => Math.max(a, b), 0);
+            if (lastObjectId >= objectId) {
+                objectId = lastObjectId + 1;
+            }
+
+            const app = new Vue({
+                el: '#app',
+                data: {
+                    scale: cellSize,
+                    grid: array(grid(20)).join(' '),
+                    radius: cellSize / 2,
+                    nodes,
+                    isMouseDown: false,
+                    target: null
+                },
+                computed: {
+                    selection() {
+                        return this.target || null;
+                    },
+                    targetId() {
+                        return this.target ? this.target.id : '';
+                    }
+                },
+                methods: {
+                    centerOf,
+                    reset,
+                    offset(x) {
+                        return x * cellSize;
+                    },
+                    isSelected(id) {
+                        return this.target && this.target.id === id;
+                    },
+                    detect(x, y) {
+                        return this.nodes.find(n => n.x === x && n.y === y);
+                    },
+                    coordinatesOf(e) {
+                        return [numberOf(e.offsetX), numberOf(e.offsetY)];
+                    },
+                    add() {
+                        this.nodes.push(node());
+                    },
+                    remove() {
+                        const id = this.targetId;
+                        this.nodes = this.nodes.filter(n => n.id !== id);
+                    },
+                    down(x, y) {
+                        const node = this.detect(x, y);
+                        if (node) {
+                            this.target = node;
+                            this.isMouseDown = true;
+                        }
+                    },
+                    up() {
+                        this.isMouseDown = false;
+                    },
+                    move(x, y) {
+                        if (this.target && this.isMouseDown) {
+                            this.target.x = x;
+                            this.target.y = y;
+                        }
+                    }
+                }
+            })
+            onunload = () => localStorage.setItem('nodes',
+                JSON.stringify(app.nodes.map(chain(pick, ...Object.keys(defaultNode)))));
+        </script>
+    </body>
+</html>

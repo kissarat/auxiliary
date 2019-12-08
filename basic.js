@@ -1,11 +1,4 @@
-const constants = require("./constants");
-const messages = require("./messages");
-
 const basic = {
-  original: {},
-  constants,
-  messages,
-
   uniq(array) {
     return array.filter((item, i) => array.indexOf(item) === i);
   },
@@ -23,6 +16,23 @@ const basic = {
 
   isFunction(fun) {
     return "function" === typeof fun;
+  },
+
+  pick(object, ...keys) {
+    const result = {};
+    for(const key of keys) {
+      const value = object[key];
+      if (typeof value !== 'undefined') {
+        result[key] = value;
+      }
+    }
+    return result;
+  },
+
+  chain(func, ...args) {
+    return function(target) {
+      return func(target, ...args);
+    }
   },
 
   isEmpty(obj) {
@@ -132,4 +142,8 @@ const basic = {
   }
 };
 
-module.exports = basic;
+if (typeof module !== 'undefined' && module.exports) {
+  module.exports = basic;
+} else {
+  Object.assign(window, basic);
+}

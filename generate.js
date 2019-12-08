@@ -17,6 +17,15 @@ function* range(max = LastNumber, i = 0) {
     }
 }
 
+function* compose(space1, space2) {
+    const items = array(space2);
+    for(const i of space1) {
+        for(const j of items) {
+            yield [i, j];
+        }
+    }
+}
+
 function* map(source, ...mappers) {
     for(const item of source) {
         let result = item;
@@ -81,7 +90,7 @@ function count(source, lastValue = LastNumber) {
     return i;
 }
 
-function first(source, is) {
+function* first(source, is) {
     for(const item of source) {
         if (is(item)) {
             yield item;
@@ -132,9 +141,11 @@ function fibonacci(n, ...mappers) {
 fibonacci.cache = [1, 1];
 
 function print(generator) {
+    const parts = [];
     for(const item of generator) {
-        console.log(item);
+        parts.push(JSON.stringify(item));
     }
+    console.log(`[\n${parts.join(',\n')}\n]`)
 }
 
 const getAt = offset => source => page(source, offset, offset + 1);
