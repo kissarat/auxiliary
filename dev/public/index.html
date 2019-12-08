@@ -44,8 +44,10 @@
                         fill="transparent"
                         stroke="rgba(0, 0, 0, 0.6)"
                     />
-                    <g v-bind:id="id" v-for="{x, y, id, to} of nodes">
+                    <g v-bind:id="id" v-for="{x, y, id, input, output} of transitions">
                         <circle
+                            v-bind:width="scale"
+                            v-bind:height="scale"
                             v-bind:r="radius"
                             v-bind:fill="isSelected(id) ? 'black' : 'rgba(0, 0, 0, 0.7)'"
                             v-bind:cx="cof(x)"
@@ -105,15 +107,56 @@
                 }
             }
 
+            function pointAt(x1, y1, x2, y2, offset) {
+                const x = x2 - x1;
+                const y = y2 - y1;
+                const length = Math.sqrt(x**2 + y**2);
+                const d = (offset > 0 ? offset : (length + offset)) / length;
+                const ax = x1 + x * d;
+                const ay = y1 + y * d;
+                return [ax, ay];
+            }
+            
             class Vector extends Point {
-                constructor(x = 0, y = 0, offset = new Point()) {
+                constructor(x = 0, y = 0, start = new Point()) {
                     super(x, y);
-                    this.offset = offset;
+                    this.start = start;
+                }
+
+                get size() {
+                    return Math.sqrt(this.x**2 + this.y**2);
+                }
+
+                get end() {
+                    return new Point(
+                        this.start.x + this.x,
+                        this.start.y + this.y
+                    )
+                }
+
+                getScale(offset) {
+                    const size = this.size;
+                    return (offset > 0 ? offset : (size + offset)) / size;
+                }
+
+                getPointAt(offset) {
+                    const scale = this.getScale(offset);
+                    return new Point(
+                        this.start.x + this.x * scale,
+                        this.start.y + this.y * scale
+                    );
                 }
             }
 
+            const pp = [4, 6, 8, 10];
             function createId(prefix = 'n') {
-                return prefix + objectId++;
+                return []
+                    .map.call(
+                        crypto.getRandomValues(new Uint8Array(16)),
+                        byte => byte.toString(16)
+                    )
+                    .map((byte, i) => pp.includes(i) ? `${byte}-` : byte)
+                    .join('');
             }
 
             // const enabled = node => node && node.enabled;
@@ -251,6 +294,11 @@
                     };
                 }
 
+                clear() {
+                    this.places = {};
+                    this.transitions = [];
+                }
+
                 toJSONString() {
                     return JSON.stringify(this.toJSON(), null, '  ');
                 }
@@ -272,6 +320,7 @@
                 const places = [];
                 let i = 0;
                 for(const s of statements) {
+                    i++;
                     if ('#' === s[0] || s.length === 0) {
                         continue;
                     }
@@ -282,7 +331,6 @@
                     } else {
                         console.error(`Unknown syntax at ${i}: ${s}`)
                     }
-                    i++;
                 }
                 return new PetriNetwork(
                     places,
@@ -312,42 +360,7 @@
             PetriNetworkView.Transition = TransitionView;
             PetriNetworkView.create = PetriNetwork.create;
 
-            const network = PetriNetworkView.create(`
-                p1=1 @1,1;
-                p2;
-                p3=1;
-                t1: p1,p2 -> p3;
-                t2: p3 -> p2;
-                t3: p2 -> p1`
-            );
-
-            const node = (x = 0, y = x) => ({
-                to: [],
-                x,
-                y,
-                id: `n${objectId++}`
-            });
-            const defaultNode = node();
-            let nodes;
-            function reset() {
-                app.nodes.splice(0);
-                objectId = 1;
-                localStorage.clear();
-            }
-            try {
-                nodes = JSON.parse(localStorage.getItem('nodes'));
-                if (!Array.isArray(nodes)) {
-                    throw Error();
-                }
-            } catch(ex) {
-                reset();
-            }
-            const lastObjectId = nodes
-                .map(n => (n.id && 'n' === n.id[0] && +n.id.slice(1)) || 0)
-                .reduce((a, b) => Math.max(a, b), 0);
-            if (lastObjectId >= objectId) {
-                objectId = lastObjectId + 1;
-            }
+            const LocalStorageKey = 'petrinet';
 
             const Modes = {
                 Nothing: '',
@@ -359,16 +372,6 @@
                 return [numberOf(e.offsetX), numberOf(e.offsetY)];
             }
 
-            function pointAt(x1, y1, x2, y2, offset) {
-                const x = x2 - x1;
-                const y = y2 - y1;
-                const length = Math.sqrt(x**2 + y**2);
-                const d = (offset > 0 ? offset : (length + offset)) / length;
-                const ax = x1 + x * d;
-                const ay = y1 + y * d;
-                return [ax, ay];
-            }
-            
             const segment = fn => (x1, y1, x2, y2) => fn(cof(x1), cof(y1), cof(x2), cof(y2));
             const rawLine = (x1, y1, x2, y2) => `M ${x1} ${y1} L ${x2} ${y2}`;
             const line = segment(rawLine);
@@ -382,14 +385,25 @@
 
             const app = new Vue({
                 el: '#app',
-                data: {
-                    scale: cellSize,
-                    grid: array(grid(20)).join(' '),
-                    radius: cellSize / 2,
-                    nodes,
-                    mode: Modes.Nothing,
-                    activeArrow: '',
-                    target: null
+                data() {
+                    let net;
+                    try {
+                        const string = localStorage.getItem(LocalStorageKey);
+                        net = string
+                            ? PetriNetworkView.create(string)
+                            : new PetriNetworkView();
+                    } catch(ex) {
+                        net = new PetriNetworkView();
+                    }
+                    return {
+                        net,
+                        scale: cellSize,
+                        grid: array(grid(20)).join(' '),
+                        radius: cellSize / 2,
+                        mode: Modes.Nothing,
+                        activeArrow: '',
+                        target: null
+                    };
                 },
                 computed: {
                     selection() {
@@ -401,7 +415,6 @@
                 },
                 methods: {
                     cof,
-                    reset,
                     coordinatesOf,
                     line,
                     arrow,
@@ -474,8 +487,12 @@
                     }
                 }
             })
-            onunload = () => localStorage.setItem('nodes',
-                JSON.stringify(app.nodes.map(chain(pick, 'id', 'to', 'x', 'y'))));
+
+            const stamp = () => `# Petri Network at ${new Date().toLocaleString()}\n`;
+            onunload = () => localStorage.setItem(
+                LocalStorageKey,
+                stamp() + app.net.toString()
+            );
         </script>
     </body>
 </html>
