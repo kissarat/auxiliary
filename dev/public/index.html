@@ -48,7 +48,7 @@
                     id="circle"
                     v-bind:r="radius"
                     v-bind:fill="isSelected(id) ? 'black' : 'rgba(0, 0, 0, 0.7)'"
-                    v-bind:cx="centerOf(x)" v-bind:cy="centerOf(y)" />
+                    v-bind:cx="cof(x)" v-bind:cy="cof(y)" />
                 </g>
             </svg>
             <div id="toolbox">
@@ -78,7 +78,8 @@
             const svg = document.querySelector('svg');
             const box = svg.getBoundingClientRect();
             const numberOf = x => Math.floor(x / cellSize);
-            const centerOf = i => i * cellSize + cellSize / 2;
+            // center of
+            const cof = i => i * cellSize + cellSize / 2;
             let objectId = 0;
 
             const node = (x = 0, y = x) => ({
@@ -119,6 +120,8 @@
                 return [numberOf(e.offsetX), numberOf(e.offsetY)];
             }
 
+            const line = (x1, y1, x2, y2) => `M ${cof(x1)} ${cof(y1)} L ${cof(x2)} ${cof(y2)}`
+
             const app = new Vue({
                 el: '#app',
                 data: {
@@ -139,7 +142,7 @@
                     }
                 },
                 methods: {
-                    centerOf,
+                    cof,
                     reset,
                     coordinatesOf,
                     offset(x) {
@@ -179,11 +182,10 @@
                                     this.target.y = y;
                                     break;
                                 case Modes.Graph:
-                                    this.arrow = [
-                                        'M', centerOf(this.target.x), centerOf(this.target.y),
-                                        'L', centerOf(x), centerOf(y)
-                                    ]
-                                        .join(' ');
+                                    this.arrow = line(
+                                        this.target.x, this.target.y,
+                                        x, y
+                                    );
                                     break;
                             }
                         }
