@@ -30,10 +30,11 @@
         <div id="app">
             <svg width="600" height="600" xmlns="http://www.w3.org/2000/svg"
             v-on:mousemove="move(...coordinatesOf($event))"
-            v-on:mousedown="down(...coordinatesOf($event))"
+            v-on:mousedown="down($event)"
             v-on:mouseup="up(...coordinatesOf($event))"
             >
                 <path v-bind:d="grid" stroke="rgba(0, 0, 0, 0.2)" />
+                <path v-bind:d="arrow" stroke="black" />
                 <g>
                     <rect v-if="selection"
                         v-bind:x="offset(selection.x)"
@@ -79,7 +80,13 @@
             const numberOf = x => Math.floor(x / cellSize);
             const centerOf = i => i * cellSize + cellSize / 2;
             let objectId = 0;
-            const node = (x = 0, y = x) => ({ x, y, id: `n${objectId++}` });
+
+            const node = (x = 0, y = x) => ({
+                to: [],
+                x,
+                y,
+                id: `n${objectId++}`
+            });
             const defaultNode = node();
             let nodes;
             function reset() {
@@ -102,6 +109,16 @@
                 objectId = lastObjectId + 1;
             }
 
+            const Modes = {
+                Nothing: '',
+                Move: 'move',
+                Graph: 'graph',
+            }
+
+            function coordinatesOf(e) {
+                return [numberOf(e.offsetX), numberOf(e.offsetY)];
+            }
+
             const app = new Vue({
                 el: '#app',
                 data: {
@@ -109,7 +126,8 @@
                     grid: array(grid(20)).join(' '),
                     radius: cellSize / 2,
                     nodes,
-                    isMouseDown: false,
+                    mode: Modes.Nothing,
+                    arrow: '',
                     target: null
                 },
                 computed: {
@@ -123,6 +141,7 @@
                 methods: {
                     centerOf,
                     reset,
+                    coordinatesOf,
                     offset(x) {
                         return x * cellSize;
                     },
@@ -132,9 +151,6 @@
                     detect(x, y) {
                         return this.nodes.find(n => n.x === x && n.y === y);
                     },
-                    coordinatesOf(e) {
-                        return [numberOf(e.offsetX), numberOf(e.offsetY)];
-                    },
                     add() {
                         this.nodes.push(node());
                     },
@@ -142,20 +158,34 @@
                         const id = this.targetId;
                         this.nodes = this.nodes.filter(n => n.id !== id);
                     },
-                    down(x, y) {
-                        const node = this.detect(x, y);
+                    down(e) {
+                        const node = this.detect(...coordinatesOf(e));
                         if (node) {
                             this.target = node;
-                            this.isMouseDown = true;
+                            this.mode = e.ctrlKey ? Modes.Graph : Modes.Move;
                         }
                     },
                     up() {
-                        this.isMouseDown = false;
+                        if (Modes.Graph === this.mode) {
+                            this.arrow = '';
+                        }
+                        this.mode = Modes.Nothing;
                     },
                     move(x, y) {
-                        if (this.target && this.isMouseDown) {
-                            this.target.x = x;
-                            this.target.y = y;
+                        if (this.target) {
+                            switch(this.mode) {
+                                case Modes.Move:
+                                    this.target.x = x;
+                                    this.target.y = y;
+                                    break;
+                                case Modes.Graph:
+                                    this.arrow = [
+                                        'M', centerOf(this.target.x), centerOf(this.target.y),
+                                        'L', centerOf(x), centerOf(y)
+                                    ]
+                                        .join(' ');
+                                    break;
+                            }
                         }
                     }
                 }
