@@ -1,0 +1,6 @@
+#!/bin/bash
+
+export PATH=${PATH}:$(${BIN}/realpath ${BIN})
+PROJECT_DIR=$(realpath ${PROJECT_DIR}) \
+PS1="\W \[$(tput sgr0)\]\[\033[38;5;2m\]\@\[$(tput sgr0)\]\[\033[38;5;15m\]\\$ \[$(tput sgr0)\]" \
+bash
