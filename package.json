@@ -24,5 +24,8 @@
   "homepage": "https://github.com/kissarat/auxiliary#readme",
   "dependencies": {
     "fast-json-patch": "^2.0.7"
+  },
+  "devDependencies": {
+    "jasmine": "^3.5.0"
   }
 }
