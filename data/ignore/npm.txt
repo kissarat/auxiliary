@@ -1,3 +1,4 @@
 .git/
 data/
 LICENSE
+README.md
