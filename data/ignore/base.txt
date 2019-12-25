@@ -2,7 +2,6 @@
 .AppleDouble
 .DS_Store
 .env
-.git/
 .idea
 .LSOverride
 .node_history

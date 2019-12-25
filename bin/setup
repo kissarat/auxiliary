@@ -3,4 +3,4 @@
 # Generate project files
 BIN=$(dirname "${BASH_SOURCE[0]}")
 $BIN/create ignore npm > $BIN/../.npmignore
-$BIN/create ignore npm > $BIN/../.gitignore
+$BIN/create ignore git > $BIN/../.gitignore
