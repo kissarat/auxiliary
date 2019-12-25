@@ -1,6 +1,8 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
-# @author Taras Labiak <kissarat@gmail.com>
-
-export PROJECT="auxiliary"
-./bin/run bash
+BIN=$(dirname "${BASH_SOURCE[0]}")
+PROJECT_DIR=${BIN}/..
+if [ ! -z $1 ]; then
+    PROJECT_DIR=$1
+fi
+BIN=${BIN} PROJECT_DIR=${PROJECT_DIR} ${BIN}/shell

@@ -1,7 +1,4 @@
-# auxiliary
-Toolbox for everyone
-
-# Install
+# Auxiliary
 ```bash
-npm install auxiliary
+npm i auxiliary
 ```

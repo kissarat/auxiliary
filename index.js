@@ -1,12 +1,2 @@
-/**
- * @author Taras Labiak <kissarat@gmail.com>
- */
-
-module.exports = {
-    ...require('./basic'),
-    ...require('./utilities'),
-    ...require('./context'),
-    ...require('./describe'),
-    ...require('./lex'),
-    ...require('./querystring')
-};
+module.exports = require('./lib');
+module.exports.registry = require('./lib/registry');
