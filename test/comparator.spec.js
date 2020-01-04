@@ -10,11 +10,13 @@ describe('comparator', () => {
                 "property": true
             }],
             "methodCompare": ".compare1",
-            // "functionCompare": "compare2",
+            "functionCompare": {
+                value: "compare2"
+            },
             "nested": {"nested": [{"nested": true}]}
         }
         const equals = comparator(schema, {
-            compare2: (a, b) => true
+            compare2: (a, b, s) => true
         });
         schema.methodCompare = {
             compare1: (a, b) => true
