@@ -1,4 +1,5 @@
 const { property, conveyor, sequence, set, filter, get } = require('../lib/conveyor');
+const toSchema = require('../examples/schema');
 
 describe('conveyor', () => {
     it('property', () => {
@@ -59,5 +60,31 @@ describe('conveyor', () => {
             get('a', 'b', 'c')
         );
         expect(actual).toEqual(1);
+    });
+    it('schema', () => {
+        const schema = toSchema({
+            time: new Date(),
+            items: [{}],
+            number: 0
+        });
+        expect(schema).toEqual({
+            type: 'object',
+            properties: {
+                time: {
+                    type: 'string',
+                    format: 'date'
+                },
+                items: {
+                    type: 'array',
+                    items: {
+                        type: 'object',
+                        properties: {}
+                    }
+                },
+                number: {
+                    type: 'number'
+                }
+            }
+        })
     });
 });

@@ -51,6 +51,7 @@ LICENSE
 README.md
 coverage
 data/
+examples/
 lcov.info
 lib-cov
 logs
