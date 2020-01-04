@@ -2,3 +2,4 @@
 data/
 LICENSE
 README.md
+test
