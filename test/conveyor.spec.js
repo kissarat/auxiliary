@@ -39,4 +39,18 @@ describe('conveyor', () => {
             b: { type: 'number'}
         });
     });
+    it('set key predicate', () => {
+        const object = { da: 'string', db: 'other string', c: 'no'};
+        const actual = conveyor(object,
+            set(
+                object => Object.keys(object).filter(s => s[0] === 'd'),
+                'number'
+            )
+        );
+        expect(actual).toEqual({
+            da: 'number',
+            db: 'number',
+            c: 'no'
+        });
+    });
 });
