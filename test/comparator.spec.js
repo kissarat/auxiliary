@@ -13,7 +13,9 @@ describe('comparator', () => {
             // "functionCompare": "compare2",
             "nested": {"nested": [{"nested": true}]}
         }
-        const equals = comparator(schema);
+        const equals = comparator(schema, {
+            compare2: (a, b) => true
+        });
         schema.methodCompare = {
             compare1: (a, b) => true
         }
