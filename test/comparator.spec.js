@@ -14,12 +14,9 @@ describe('comparator', () => {
             "nested": {"nested": [{"nested": true}]}
         }
         const equals = comparator(schema);
-        const object = {
-            ...schema,
-            methodCompare: {
-                compare1: (a, b) => true
-            }
+        schema.methodCompare = {
+            compare1: (a, b) => true
         }
-        expect(equals(object, object)).toBeTrue();
+        expect(equals(schema, schema)).toBeTrue();
     })
 });
