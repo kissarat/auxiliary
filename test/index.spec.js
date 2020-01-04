@@ -47,13 +47,14 @@ describe('index', () => {
     });
 
     it('merge', () => {
-        const first = { a: { a: 111 } };
-        const second = { a: { b: 211 } };
+        const first = { a: { a: 111, c: [13, 12] } };
+        const second = { a: { b: 211, c: [12, 12, 13] } };
         const actual = merge(first, second);
         expect(actual).toEqual({
             a: {
                 a: 111,
-                b: 211
+                b: 211,
+                c: [13, 12]
             }
         });
     });
