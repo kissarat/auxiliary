@@ -1,4 +1,4 @@
-const { property, conveyor, sequence, set, filter } = require('../lib/conveyor');
+const { property, conveyor, sequence, set, filter, get } = require('../lib/conveyor');
 
 describe('conveyor', () => {
     it('property', () => {
@@ -38,5 +38,26 @@ describe('conveyor', () => {
             a: { type: 'string' },
             b: { type: 'number'}
         });
+    });
+    it('set key predicate', () => {
+        const object = { da: 'string', db: 'other string', c: 'no'};
+        const actual = conveyor(object,
+            set(
+                object => Object.keys(object).filter(s => s[0] === 'd'),
+                'number'
+            )
+        );
+        expect(actual).toEqual({
+            da: 'number',
+            db: 'number',
+            c: 'no'
+        });
+    });
+    it('get', () => {
+        const object = { a: { b: { c: 1 } } };
+        const actual = conveyor(object,
+            get('a', 'b', 'c')
+        );
+        expect(actual).toEqual(1);
     });
 });
