@@ -1,4 +1,4 @@
-const { pick, isObject, uniq } = require('../lib');
+const { pick, isObject, uniq, arrayMerge } = require('../lib');
 
 describe('index', () => {
     it('isObject', () => {
@@ -37,5 +37,12 @@ describe('index', () => {
             'b3294a45-caf0-49be-9d37-ded515bad95b',
             '1bcfb557-feba-42c1-860b-c7cf7bb9a27c'
         ]);
+    });
+
+    it('uniq number', () => {
+        const first = [15, 250];
+        const second = [250, 101, 101, 1];
+        const actual = arrayMerge(first, second);
+        expect(actual).toEqual([15, 250, 101, 1]);
     });
 });
