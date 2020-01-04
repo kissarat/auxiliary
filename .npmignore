@@ -48,6 +48,7 @@ $RECYCLE.BIN/
 .vscode
 Icon
 LICENSE
+README.md
 coverage
 data/
 lcov.info
@@ -60,3 +61,4 @@ package-lock.json
 pids
 results
 ssl
+test
