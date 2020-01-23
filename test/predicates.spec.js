@@ -1,4 +1,5 @@
 const { has, and } = require('../lib/predicates');
+const { strictEqual } = require('assert');
 
 describe('predicates', () => {
     it('has', () => {
@@ -12,6 +13,6 @@ describe('predicates', () => {
             has('b', 'a'),
             has('c')
         )
-        expect(predicate(object)).toBeTrue();
+        strictEqual(predicate(object), true);
     });
 });

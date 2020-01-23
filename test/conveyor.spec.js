@@ -1,45 +1,51 @@
 const { property, conveyor, sequence, set, filter, get } = require('../lib/conveyor');
 const toSchema = require('../examples/schema');
+const { strictEqual, deepStrictEqual } = require('assert');
 
 describe('conveyor', () => {
     it('property', () => {
         const expected = 1;
         const object = { actual: expected };
-        property('actual', value => expect(value).toEqual(expected))(object)
+        property('actual', value => strictEqual(value, expected))(object)
     });
+
     it('sequence', () => {
         const seq = sequence(
             set('a', 10),
             set('b', 2)
         );
         const actual = seq({});
-        expect(actual.a).toEqual(10);
-        expect(actual.b).toEqual(2);
+        strictEqual(actual.a, 10);
+        strictEqual(actual.b, 2);
     });
+
     it('conveyor', () => {
         const actual = conveyor({},
             set('a', 10),
             set('b', 2)
         );
-        expect(actual.a).toEqual(10);
-        expect(actual.b).toEqual(2);
+        strictEqual(actual.a, 10);
+        strictEqual(actual.b, 2);
     });
+
     it('filter', () => {
         const actual = conveyor(['aa', 'ab', 'c'],
             filter(key => key[0] === 'a')
         );
-        expect(actual).toEqual(['aa', 'ab']);
+        deepStrictEqual(actual, ['aa', 'ab']);
     });
+
     it('set', () => {
         const object = { a: 'string', b: { type: 'number'}};
         const actual = conveyor(object,
             set(['a', 'b'], type => typeof type === 'string' ? { type } : type)
         );
-        expect(actual).toEqual({
+        deepStrictEqual(actual, {
             a: { type: 'string' },
             b: { type: 'number'}
         });
     });
+
     it('set key predicate', () => {
         const object = { da: 'string', db: 'other string', c: 'no'};
         const actual = conveyor(object,
@@ -48,26 +54,28 @@ describe('conveyor', () => {
                 'number'
             )
         );
-        expect(actual).toEqual({
+        deepStrictEqual(actual, {
             da: 'number',
             db: 'number',
             c: 'no'
         });
     });
+
     it('get', () => {
         const object = { a: { b: { c: 1 } } };
         const actual = conveyor(object,
             get('a', 'b', 'c')
         );
-        expect(actual).toEqual(1);
+        strictEqual(actual, 1);
     });
+
     it('schema', () => {
         const schema = toSchema({
             time: new Date(),
             items: [{}],
             number: 0
         });
-        expect(schema).toEqual({
+        deepStrictEqual(schema, {
             type: 'object',
             properties: {
                 time: {

@@ -1,4 +1,5 @@
 const comparator = require('../lib/comparator');
+const { strictEqual } = require('assert');
 
 describe('comparator', () => {
     it('comparator', () => {
@@ -21,6 +22,6 @@ describe('comparator', () => {
         schema.methodCompare = {
             compare1: (a, b) => true
         }
-        expect(equals(schema, schema)).toBeTrue();
+        strictEqual(equals(schema, schema), true);
     })
 });

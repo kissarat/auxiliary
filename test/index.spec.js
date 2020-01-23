@@ -1,25 +1,26 @@
 const { pick, isObject, uniq, arrayMerge, merge } = require('../lib');
+const { strictEqual, deepStrictEqual } = require('assert');
 
 describe('index', () => {
     it('isObject', () => {
         for(const v of [null, true, '', ' ', 'abc', 0, 1, Infinity, NaN]) {
-            expect(isObject(true)).toBeFalse();
+            strictEqual(isObject(true), false);
         }
         for(const v of [{}, {a: 'a'}, Object, class SomeObject {}]) {
-            expect(isObject(true)).toBeFalse();
+            strictEqual(isObject(true), false);
         }
     });
 
     it('pick', () => {
         const source = { a: 1, b: 2 };
         const actual = pick(source, 'a');
-        expect(actual.a).toEqual(source.a);
-        expect(actual.b).toBeUndefined();
+        strictEqual(actual.a, source.a);
+        strictEqual(actual.b, undefined);
     });
 
     it('uniq number', () => {
         const actual = [15, 250, 250, 101, 101, 1]
-        expect(uniq(actual)).toEqual([15, 250, 101, 1]);
+        deepStrictEqual(uniq(actual), [15, 250, 101, 1]);
     });
 
     it('uniq string', () => {
@@ -31,7 +32,7 @@ describe('index', () => {
             'b3294a45-caf0-49be-9d37-ded515bad95b',
             '1bcfb557-feba-42c1-860b-c7cf7bb9a27c'
         ]
-        expect(uniq(actual)).toEqual([
+        deepStrictEqual(uniq(actual), [
             'fd96a283-900f-4d7e-8ef4-e518c560fbd9',
             'e4b1628b-3220-4f4b-9290-5893b4229594',
             'b3294a45-caf0-49be-9d37-ded515bad95b',
@@ -43,14 +44,14 @@ describe('index', () => {
         const first = [15, 250];
         const second = [250, 101, 101, 1];
         const actual = arrayMerge(first, second);
-        expect(actual).toEqual([15, 250, 101, 1]);
+        deepStrictEqual(actual, [15, 250, 101, 1]);
     });
 
     it('merge', () => {
         const first = { a: { a: 111, c: [13, 12] } };
         const second = { a: { b: 211, c: [12, 12, 13] } };
         const actual = merge(first, second);
-        expect(actual).toEqual({
+        deepStrictEqual(actual, {
             a: {
                 a: 111,
                 b: 211,
