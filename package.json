@@ -23,6 +23,6 @@
   },
   "homepage": "https://github.com/kissarat/auxiliary#readme",
   "devDependencies": {
-    "mocha": "^7.0.0"
+    "jasmine": "^3.5.0"
   }
 }
