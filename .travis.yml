@@ -3,5 +3,5 @@ os:
   - windows
   - linux
 node_js:
-  - 7
+  - 8
   - 12
