@@ -1,4 +1,6 @@
 language: node_js
+arch:
+  - arm64
 os:
   - windows
   - linux
