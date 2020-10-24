@@ -1,7 +1,7 @@
 {
   "name": "auxiliary",
   "version": "0.1.5",
-  "description": "Toolbox for everyone",
+  "description": "Sequental tools",
   "main": "index.js",
   "engines": {
     "node": ">= 8.0.0"
