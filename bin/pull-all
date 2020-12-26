@@ -1,0 +1,12 @@
+#!/bin/bash
+
+DIR=$1
+for i in `ls $DIR`; do
+        cd $i
+        BRANCH=$(branch);
+        git checkout origin master
+        pull
+        git checkout origin $BRANCH
+        pull
+        cd ..
+done

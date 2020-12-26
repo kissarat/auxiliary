@@ -1,0 +1,12 @@
+#!/bin/bash
+
+GITHUB_PROJECT_SSH_URI=$1
+GITHUB_USER=$(echo $GITHUB_PROJECT_SSH_URI | sed 's/[\/.]/:/g' | cut -d: -f3)
+GITHUB_PROJECT_NAME=$(echo $GITHUB_PROJECT_SSH_URI | sed 's/[\/.]/:/g' | cut -d: -f4)
+PROJECT_DIR=$HOME/Public/github.com/$GITHUB_USER
+mkdir -p $PROJECT_DIR
+# pushd .
+cd $PROJECT_DIR
+git clone $GITHUB_PROJECT_SSH_URI
+# popd
+code $PROJECT_DIR/$GITHUB_PROJECT_NAME
