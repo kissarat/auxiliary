@@ -27,5 +27,9 @@
   "homepage": "https://github.com/kissarat/auxiliary#readme",
   "devDependencies": {
     "mocha": "^7.0.0"
+  },
+  "dependencies": {
+    "get-value": "^3.0.1",
+    "set-value": "^3.0.2"
   }
 }
