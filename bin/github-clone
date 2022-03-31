@@ -1,12 +1,17 @@
 #!/bin/bash
+set -e
 
-GITHUB_PROJECT_SSH_URI=$1
-GITHUB_USER=$(echo $GITHUB_PROJECT_SSH_URI | sed 's/[\/.]/:/g' | cut -d: -f3)
-GITHUB_PROJECT_NAME=$(echo $GITHUB_PROJECT_SSH_URI | sed 's/[\/.]/:/g' | cut -d: -f4)
-PROJECT_DIR=$HOME/Public/github.com/$GITHUB_USER
-mkdir -p $PROJECT_DIR
+BIN=$(dirname "${BASH_SOURCE[0]}")
+uri="$1"
+test -z "$GITHUB_MODULE" && GITHUB_MODULE=$(echo "$uri" | sed 's/^git@github\.com://' | sed 's/^https:\/\/github\.com\///' | sed 's/\.git$//')
+test -z "$GITHUB_DIR" && GITHUB_DIR="${HOME}/Public/github.com"
+test -z "$MODULE_DIR" && MODULE_DIR="${GITHUB_DIR}/${GITHUB_MODULE}"
+mkdir -p "$MODULE_DIR"
 # pushd .
-cd $PROJECT_DIR
-git clone $GITHUB_PROJECT_SSH_URI
+git clone "git@github.com:$GITHUB_MODULE.git" "$MODULE_DIR"
 # popd
-code $PROJECT_DIR/$GITHUB_PROJECT_NAME
+cd "$MODULE_DIR"
+"$BIN/salo.sh"
+test -f ./package.json && npm i
+test -f ./requirements.txt && "pip$PYTHON_VERSION" install -r ./requirements.txt
+test -z "$STUDIO" || "$STUDIO" .

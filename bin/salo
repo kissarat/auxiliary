@@ -1,0 +1,29 @@
+#!/bin/bash
+set -e
+
+if test -z "$SALO_SOURCE"; then
+    if test -z "$STUDIO"; then
+        for s in code open; do
+            if type -t "$s"; then
+                STUDIO="$s"
+                break
+            fi
+        done
+    fi
+    test -d "$SALO_BIN" || SALO_BIN=$(dirname "${BASH_SOURCE[0]}")
+
+    if test -z "$SALO_TYPE"; then
+        test -f ./package.json && SALO_TYPE=node
+        test -f ./requirements.txt && SALO_TYPE=python
+    fi
+    SALO_SOURCE="${SALO_BIN}/salo-${SALO_TYPE}"
+fi
+
+case "$1" in
+    studio)
+        "$STUDIO" .
+        ;;
+    *)
+        source "${SALO_SOURCE}" $@
+        ;;
+esac

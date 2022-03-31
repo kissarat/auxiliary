@@ -1,0 +1,14 @@
+test -f "$SALO_SOURCE" || return $?
+
+case "$1" in
+    install-deps)
+        npm install
+        ;;
+    remove-deps)
+        rm -r ./node_modules
+        ;;
+    *)
+        echo "Unknown command: " $@
+        return 1
+        ;;
+esac

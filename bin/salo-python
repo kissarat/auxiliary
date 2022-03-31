@@ -1,0 +1,11 @@
+test -f "$SALO_SOURCE" || return $?
+
+case "$1" in
+    install-deps)
+        pip$PYTHON_VERSION -r ./requirements.txt
+        ;;
+    *)
+        echo "Unknown command: " $@
+        return 1
+        ;;
+esac
